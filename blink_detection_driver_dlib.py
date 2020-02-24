@@ -13,6 +13,7 @@ def getVideoStream(args):
         vs = VideoStream(usePiCamera=True).start()
         fileStream = False
         print("[INFO] starting camera capturing")
+        print(vs)
     else:
         # Choose the given video file
         vs = cv2.VideoCapture(args["video"])
@@ -20,12 +21,7 @@ def getVideoStream(args):
         print("[INFO] starting video stream thread...")
     return vs, fileStream
 
-def main(args):
-    print("[INFO] loading facial landmark predictor...")
-    # Load mtcnn detector from facenet
-    detector = dlib.get_frontal_face_detector()
-    vs, file_stream = getVideoStream(args)
-    # Read the first frame
+def startVideoStream(vs, detector):
     success, frame = vs.read()
     face_box = None
     i = 0
@@ -64,6 +60,55 @@ def main(args):
         success, frame = vs.read()
 
     cv2.destroyAllWindows()
+    sum = 0
+    for runtime in runtime_array:
+        sum += runtime
+    avg = sum / len(runtime_array)
+    print ("Avg blink detection time:" , avg)
+    sum = 0
+    for runtime in face_detection_runtime_array:
+        sum += runtime
+    avg = sum / len(face_detection_runtime_array)
+    print ("Avg face detection time:" , avg)
+
+def startCameraSteam(vs, detector):
+    frame = vs.read()
+    face_box = None
+    i = 0
+    runtime_array = []
+    face_detection_runtime_array = []
+    is_real = False
+    while True:
+        print("Frame: ", i)
+        i+=1
+        frame = imutils.resize(frame, width=450)
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # detect faces in the rgb frame
+        start = time.time()
+        rects = detector(frame_rgb, 0)
+        stop = time.time()
+        face_detection_runtime_array.append(stop-start)
+        frame_draw = frame.copy()
+        for rect in rects:
+            if face_box is None:
+                face_box = FaceBox(None, frame, args["shape_predictor"], rect)
+            else:
+                face_box.updateFrame(frame)
+                face_box.updateRect(None, rect)
+            start = time.time()
+            check_liveness = face_box.checkFrame() 
+            stop = time.time()
+            runtime_array.append(stop-start)
+            if check_liveness :
+                print("Real")
+                is_real = True
+        cv2.imshow("Frame", frame)
+        key = cv2.waitKey(1) & 0xFF
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break  
+
+    cv2.destroyAllWindows()
     if not file_stream:
         vs.stop()
     sum = 0
@@ -76,6 +121,18 @@ def main(args):
         sum += runtime
     avg = sum / len(face_detection_runtime_array)
     print ("Avg face detection time:" , avg)
+
+def main(args):
+    print("[INFO] loading facial landmark predictor...")
+    # Load mtcnn detector from facenet
+    detector = dlib.get_frontal_face_detector()
+    vs, file_stream = getVideoStream(args)
+    # Read the first frame
+    if(file_stream):
+        startVideoStream(vs, detector)
+    else:
+        startCameraSteam(vs, detector)
+    
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
