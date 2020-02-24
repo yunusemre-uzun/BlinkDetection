@@ -15,7 +15,7 @@ def getVideoStream(args):
         #vs = VideoStream(usePiCamera=True).start()
         fileStream = False
         print("[INFO] starting camera capturing")
-        #print(vs)
+        vs = None
     else:
         # Choose the given video file
         vs = cv2.VideoCapture(args["video"])
