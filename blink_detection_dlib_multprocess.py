@@ -72,13 +72,13 @@ def startVideoStream(vs, detector):
     avg = sum / len(face_detection_runtime_array)
     print ("Avg face detection time:" , avg)
 
-def startCameraSteam(vs, detector):
+def startCameraSteam(vs, detector, gap):
     face_box = None
     i = 0
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
-    time.sleep(2.0)
+    time.sleep(2.0+gap)
     while True:
         frame = vs.read()
         frame = imutils.resize(frame, width=250)
@@ -132,9 +132,9 @@ def main(args):
     if(file_stream):
         startVideoStream(vs, detector)
     else:
-        p1 = Process(target=startCameraSteam, args=(vs, detector))
-        p2 = Process(target=startCameraSteam, args=(vs, detector))
-        p3 = Process(target=startCameraSteam, args=(vs, detector))
+        p1 = Process(target=startCameraSteam, args=(vs, detector, 0))
+        p2 = Process(target=startCameraSteam, args=(vs, detector, 0.1))
+        p3 = Process(target=startCameraSteam, args=(vs, detector, 0.2))
         p1.start()
         p2.start()
         p3.start()
