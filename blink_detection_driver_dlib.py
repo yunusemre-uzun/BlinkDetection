@@ -114,6 +114,7 @@ def startCameraSteam(detector):
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
             break  
+        rawCapture.truncate(0)
 
     cv2.destroyAllWindows()
     vs.stop()
