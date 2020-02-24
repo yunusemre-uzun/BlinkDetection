@@ -12,10 +12,10 @@ import imutils
 def getVideoStream(args):
     if args["video"]=="":
         # Choose the camera as default
-        #vs = VideoStream(usePiCamera=True).start()
+        vs = VideoStream(usePiCamera=True).start()
         fileStream = False
         print("[INFO] starting camera capturing")
-        vs = None
+        #vs = None
     else:
         # Choose the given video file
         vs = cv2.VideoCapture(args["video"])
@@ -73,34 +73,31 @@ def startVideoStream(vs, detector):
     avg = sum / len(face_detection_runtime_array)
     print ("Avg face detection time:" , avg)
 
-def startCameraSteam(detector):
-    camera = PiCamera()
-    camera.resolution = (640, 480)
-    camera.framerate = 32
-    rawCapture = PiRGBArray(camera, size=(640, 480))
+def startCameraSteam(vs, detector):
     face_box = None
     i = 0
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
-    time.sleep(1.0)
-    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-        image = frame.array
+    time.sleep(2.0)
+    while True:
+        frame = vs.read()
+        frame = imutils.resize(frame, width=500)
         print("Frame: ", i)
         i+=1
         #frame = imutils.resize(frame, width=450)
-        frame_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        frame_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         # detect faces in the rgb frame
         start = time.time()
         rects = detector(frame_rgb, 0)
         stop = time.time()
         print("Face detection time:", stop-start)
-        frame_draw = image.copy()
+        frame_draw = frame_gray.copy()
         for rect in rects:
             if face_box is None:
-                face_box = FaceBox(None, image, args["shape_predictor"], rect)
+                face_box = FaceBox(None, frame_gray, args["shape_predictor"], rect)
             else:
-                face_box.updateFrame(image)
+                face_box.updateFrame(frame_gray)
                 face_box.updateRect(None, rect)
             start = time.time()
             check_liveness = face_box.checkFrame() 
@@ -138,7 +135,7 @@ def main(args):
     if(file_stream):
         startVideoStream(vs, detector)
     else:
-        startCameraSteam(detector)
+        startCameraSteam(vs, detector)
     
 
 if __name__ == "__main__":
