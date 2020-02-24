@@ -1,4 +1,6 @@
 import argparse
+from picamera.array import PiRGBArray
+from picamera import PiCamera
 from imutils.video import FileVideoStream
 from imutils.video import VideoStream
 from face_box import FaceBox
@@ -71,30 +73,36 @@ def startVideoStream(vs, detector):
     avg = sum / len(face_detection_runtime_array)
     print ("Avg face detection time:" , avg)
 
-def startCameraSteam(vs, detector):
+def startCameraSteam(detector):
+    camera = PiCamera()
+    camera.resolution = (640, 480)
+    camera.framerate = 32
+    rawCapture = PiRGBArray(camera, size=(640, 480))
     face_box = None
     i = 0
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
     time.sleep(1.0)
-    frame = vs.read()
-    while True:
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+	# grab the raw NumPy array representing the image, then initialize the timestamp
+	# and occupied/unoccupied text
+	    image = frame.array
         print("Frame: ", i)
         i+=1
         #frame = imutils.resize(frame, width=450)
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         # detect faces in the rgb frame
         start = time.time()
         rects = detector(frame_rgb, 0)
         stop = time.time()
         face_detection_runtime_array.append(stop-start)
-        frame_draw = frame.copy()
+        frame_draw = image.copy()
         for rect in rects:
             if face_box is None:
-                face_box = FaceBox(None, frame, args["shape_predictor"], rect)
+                face_box = FaceBox(None, image, args["shape_predictor"], rect)
             else:
-                face_box.updateFrame(frame)
+                face_box.updateFrame(image)
                 face_box.updateRect(None, rect)
             start = time.time()
             check_liveness = face_box.checkFrame() 
@@ -103,7 +111,7 @@ def startCameraSteam(vs, detector):
             if check_liveness :
                 print("Real")
                 is_real = True
-        cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", image)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
@@ -131,7 +139,7 @@ def main(args):
     if(file_stream):
         startVideoStream(vs, detector)
     else:
-        startCameraSteam(vs, detector)
+        startCameraSteam(detector)
     
 
 if __name__ == "__main__":
