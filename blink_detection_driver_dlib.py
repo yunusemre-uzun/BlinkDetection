@@ -97,7 +97,7 @@ def startCameraSteam(vs, detector):
                 face_box.updateFrame(frame_gray)
                 face_box.updateRect(None, rect)
             start = time.time()
-            check_liveness = face_box.checkFrame(frame) 
+            check_liveness = face_box.checkFrame(frame_gray) 
             stop = time.time()
             runtime_array.append(stop-start)
             if check_liveness :
