@@ -8,16 +8,16 @@ import dlib
 import imutils
 
 def getVideoStream(args):
-    if args["video"] is None:
+    if args["video"]=="":
         # Choose the camera as default
         vs = VideoStream(0)
         fileStream = False
-        print("[INFO] starting video stream thread...")
+        print("[INFO] starting camera capturing")
     else:
         # Choose the given video file
         vs = cv2.VideoCapture(args["video"])
         fileStream = True
-        print("[INFO] startign camera capturing")
+        print("[INFO] starting video stream thread...")
     return vs, fileStream
 
 def main(args):
