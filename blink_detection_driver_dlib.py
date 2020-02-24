@@ -94,7 +94,7 @@ def startCameraSteam(detector):
         start = time.time()
         rects = detector(frame_rgb, 0)
         stop = time.time()
-        face_detection_runtime_array.append(stop-start)
+        print("Face detection time:", stop-start)
         frame_draw = image.copy()
         for rect in rects:
             if face_box is None:
@@ -105,7 +105,7 @@ def startCameraSteam(detector):
             start = time.time()
             check_liveness = face_box.checkFrame() 
             stop = time.time()
-            runtime_array.append(stop-start)
+            print("Blink detection time:", stop-start)
             if check_liveness :
                 print("Real")
                 is_real = True
