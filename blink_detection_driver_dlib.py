@@ -79,8 +79,8 @@ def startCameraSteam(vs, detector):
     is_real = False
     time.sleep(1.0)
     frame = vs.read()
-    print(frame)
     while True:
+        print(frame)
         print("Frame: ", i)
         i+=1
         #frame = imutils.resize(frame, width=450)
@@ -104,7 +104,6 @@ def startCameraSteam(vs, detector):
             if check_liveness :
                 print("Real")
                 is_real = True
-            frame = vs.read()
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
@@ -112,8 +111,7 @@ def startCameraSteam(vs, detector):
             break  
 
     cv2.destroyAllWindows()
-    if not file_stream:
-        vs.stop()
+    vs.stop()
     sum = 0
     for runtime in runtime_array:
         sum += runtime
