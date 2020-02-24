@@ -82,7 +82,7 @@ def startCameraSteam(vs, detector):
     while True:
         print("Frame: ", i)
         i+=1
-        frame = imutils.resize(frame, width=450)
+        #frame = imutils.resize(frame, width=450)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # detect faces in the rgb frame
         start = time.time()
