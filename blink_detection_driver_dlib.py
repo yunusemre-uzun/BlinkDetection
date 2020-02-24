@@ -86,7 +86,7 @@ def startCameraSteam(vs, detector):
         print("Frame: ", i)
         i+=1
         #frame = imutils.resize(frame, width=450)
-        frame_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # detect faces in the rgb frame
         start = time.time()
         rects = detector(frame_rgb, 0)
@@ -106,7 +106,7 @@ def startCameraSteam(vs, detector):
             if check_liveness :
                 print("Real")
                 is_real = True
-        cv2.imshow("Frame", image)
+        cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q"):
