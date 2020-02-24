@@ -61,6 +61,7 @@ class BlinkDetector(object):
     
     @staticmethod
     def calculateEyeAspectRatio(eye):
+        print(eye[1])
         vertical_distance_1 = dist.euclidean(eye[1], eye[5])
         vertical_distance_2 = dist.euclidean(eye[2], eye[4])
         horizontal_distance = dist.euclidean(eye[0], eye[3])
