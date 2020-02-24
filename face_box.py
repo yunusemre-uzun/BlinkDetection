@@ -25,6 +25,8 @@ class FaceBox(object):
             self.counter += 1
         elif not self.is_previos_eye_closed :
             self.counter = 0   
+        else:
+            self.is_previos_eye_closed
         if self.counter >= EYE_AR_CONSEC_FRAMES:
             return True
         return False
