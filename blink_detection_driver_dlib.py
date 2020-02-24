@@ -80,7 +80,6 @@ def startCameraSteam(vs, detector):
     time.sleep(1.0)
     frame = vs.read()
     while True:
-        print(frame)
         print("Frame: ", i)
         i+=1
         #frame = imutils.resize(frame, width=450)
