@@ -76,13 +76,13 @@ def startCameraSteam(vs, detector):
     while True:
         start = time.time()
         frame = getFrame(vs)
-        p1 = Process(target=processFrame, args=(frame,))
+        p1 = Process(target=processFrame, args=(frame, detector,))
         time.sleep(0.05)
         frame = getFrame(vs)
-        p2 = Process(target=processFrame, args=(frame,))
+        p2 = Process(target=processFrame, args=(frame, detector,))
         time.sleep(0.05)
         frame = getFrame(vs)
-        p3 = Process(target=processFrame, args=(frame,))
+        p3 = Process(target=processFrame, args=(frame, detector,))
         p1.start()
         p2.start()
         p3.start()
@@ -106,7 +106,7 @@ def getFrame(vs):
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return frame_gray
 
-def processFrame(frame):
+def processFrame(frame, detector):
     rects = detector(frame, 0)
     for rect in rects:
         if FACE_BOX is None:
