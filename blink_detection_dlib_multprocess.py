@@ -83,6 +83,7 @@ def startCameraSteam(vs, detector, gap):
     time.sleep(2.0+gap)
     while True:
         frame = vs.read()
+        print(frame)
         frame = imutils.resize(frame, width=250)
         print("Frame: ", i)
         i+=1
