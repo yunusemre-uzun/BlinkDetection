@@ -1,7 +1,6 @@
 import argparse
 from imutils.video import FileVideoStream
 from imutils.video import VideoStream
-from face_detection import FaceDetector
 from face_box import FaceBox
 import cv2
 import time
