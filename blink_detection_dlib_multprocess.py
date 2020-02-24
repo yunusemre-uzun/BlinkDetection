@@ -78,6 +78,8 @@ def startCameraSteam(vs, detector, gap):
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
+    print(vs)
+    print("Sleeping for ", 2.0+gap)
     time.sleep(2.0+gap)
     while True:
         frame = vs.read()
