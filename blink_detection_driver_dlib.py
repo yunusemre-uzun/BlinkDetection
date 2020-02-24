@@ -10,7 +10,7 @@ import imutils
 def getVideoStream(args):
     if args["video"]=="":
         # Choose the camera as default
-        vs = VideoStream(0)
+        vs = VideoStream(usePiCamera=True).start()
         fileStream = False
         print("[INFO] starting camera capturing")
     else:
