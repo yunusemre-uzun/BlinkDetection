@@ -91,7 +91,6 @@ def startCameraSteam(vs, detector):
         p3.join()
         end = time.time()
         print("Time elapsed: ", end-start)
-        cv2.imshow("Frame", frame_gray)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q") or is_real:
@@ -119,6 +118,7 @@ def processFrame(frame):
         if check_liveness :
             print("Real")
             IS_REAL = True
+    cv2.imshow("Frame", frame)
     return None
 
 def avgCalculations(runtime_array, face_detection_runtime_array):
