@@ -1,6 +1,6 @@
 from imutils import face_utils
 from paramaters import *
-from scipy.spatial import distance as dist
+import math
 
 
 class BlinkDetector(object):
@@ -61,12 +61,16 @@ class BlinkDetector(object):
     
     @staticmethod
     def calculateEyeAspectRatio(eye):
-        print(eye[1])
-        vertical_distance_1 = dist.euclidean(eye[1], eye[5])
-        vertical_distance_2 = dist.euclidean(eye[2], eye[4])
-        horizontal_distance = dist.euclidean(eye[0], eye[3])
+        vertical_distance_1 = BlinkDetector.calculateEuclidianDistance2DPoints(eye[1], eye[5])
+        vertical_distance_2 = BlinkDetector.calculateEuclidianDistance2DPoints(eye[2], eye[4])
+        horizontal_distance = BlinkDetector.calculateEuclidianDistance2DPoints(eye[0], eye[3])
         # compute the eye aspect ratio
         ear = (vertical_distance_1 + vertical_distance_2) / (2.0 * horizontal_distance)
         return ear
+    
+    def calculateEuclidianDistance2DPoints(point_1, point_2):
+        tmp_1 = point_1[0] - point_2[0]
+        tmp_2 = point_1[1] - point_2[1]
+        return math.sqrt(math.pow(tmp_1,2)+math.pow(tmp_2,2))
 
 
