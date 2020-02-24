@@ -1,3 +1,4 @@
+from multiprocessing import Process
 import argparse
 from imutils.video import FileVideoStream
 from imutils.video import VideoStream
@@ -131,7 +132,15 @@ def main(args):
     if(file_stream):
         startVideoStream(vs, detector)
     else:
-        startCameraSteam(vs, detector)
+        p1 = Process(target=startCameraSteam, args=(vs, detector))
+        p2 = Process(target=startCameraSteam, args=(vs, detector))
+        p3 = Process(target=startCameraSteam, args=(vs, detector))
+        p1.start()
+        p2.start()
+        p3.start()
+        p1.join()
+        p2.join()
+        p3.join()
     
 
 if __name__ == "__main__":
