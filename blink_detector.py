@@ -57,8 +57,8 @@ class BlinkDetector(object):
         right_eye = shape[rStart:rEnd]
         leftEyeHull = cv2.convexHull(left_eye)
         rightEyeHull = cv2.convexHull(right_eye)
-        cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-        cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+        cv2.drawContours(frame, [leftEyeHull], -1, (255, 255, 255), 1)
+        cv2.drawContours(frame, [rightEyeHull], -1, (255, 255, 255), 1)
         leftEAR = BlinkDetector.calculateEyeAspectRatio(left_eye)
         rightEAR = BlinkDetector.calculateEyeAspectRatio(right_eye)
         ear = (leftEAR + rightEAR) / 2.0
