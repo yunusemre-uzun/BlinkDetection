@@ -46,7 +46,7 @@ def startVideoStream(vs, detector):
                 face_box.updateFrame(frame)
                 face_box.updateRect(None, rect)
             start = time.time()
-            check_liveness = face_box.checkFrame() 
+            check_liveness = face_box.checkFrame(frame) 
             stop = time.time()
             runtime_array.append(stop-start)
             if check_liveness :
@@ -97,7 +97,7 @@ def startCameraSteam(vs, detector):
                 face_box.updateFrame(frame_gray)
                 face_box.updateRect(None, rect)
             start = time.time()
-            check_liveness = face_box.checkFrame() 
+            check_liveness = face_box.checkFrame(frame) 
             stop = time.time()
             runtime_array.append(stop-start)
             if check_liveness :

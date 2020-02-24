@@ -1,6 +1,7 @@
 from imutils import face_utils
 from paramaters import *
 import math
+import cv2
 
 
 class BlinkDetector(object):
@@ -25,11 +26,11 @@ class BlinkDetector(object):
         return len(BlinkDetector.__registered_face_boxes) - 1
 
     @staticmethod
-    def detect(id):
+    def detect(id, frame):
         shape = BlinkDetector.getFaceShape(id)
         # extract the left and right eye coordinates, then use the
         # coordinates to compute the eye aspect ratio for both eyes
-        ear = BlinkDetector.getEyeAspectRatio(shape)
+        ear = BlinkDetector.getEyeAspectRatio(shape, frame)
         # If eye is closed return True
         if ear < EYE_AR_THRESH:   
            return True
@@ -51,9 +52,13 @@ class BlinkDetector(object):
         return BlinkDetector.__registered_face_boxes[id]
     
     @staticmethod
-    def getEyeAspectRatio(shape):
+    def getEyeAspectRatio(shape, frame):
         left_eye = shape[lStart:lEnd]
         right_eye = shape[rStart:rEnd]
+        leftEyeHull = cv2.convexHull(left_eye)
+        rightEyeHull = cv2.convexHull(right_eye)
+        cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+        cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
         leftEAR = BlinkDetector.calculateEyeAspectRatio(left_eye)
         rightEAR = BlinkDetector.calculateEyeAspectRatio(right_eye)
         ear = (leftEAR + rightEAR) / 2.0

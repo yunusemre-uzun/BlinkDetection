@@ -15,8 +15,8 @@ class FaceBox(object):
         self.id = BlinkDetector.registerBox(self)
 
     
-    def checkFrame(self):
-        if BlinkDetector.detect(self.id):
+    def checkFrame(self, frame):
+        if BlinkDetector.detect(self.id, frame):
             print(self.is_previos_eye_closed, ":", self.counter)
             # If eye is closed
             if not self.is_previos_eye_closed:
