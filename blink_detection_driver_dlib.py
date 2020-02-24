@@ -89,6 +89,8 @@ def startCameraSteam(vs, detector):
         start = time.time()
         rects = detector(frame_gray, 0)
         stop = time.time()
+        if stop-start > 1:
+            print("Bottlenecked: ", stop-start)
         face_detection_runtime_array.append(stop-start)
         for rect in rects:
             if face_box is None:
