@@ -90,7 +90,7 @@ def startCameraSteam(vs, detector):
         p2.join()
         p3.join()
         end = time.time()
-        print("Time elapsed: ", stop-start)
+        print("Time elapsed: ", end-start)
         cv2.imshow("Frame", frame_gray)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
