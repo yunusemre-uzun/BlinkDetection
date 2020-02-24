@@ -92,7 +92,6 @@ def startCameraSteam(vs, detector):
         rects = detector(frame_gray, 0)
         stop = time.time()
         face_detection_runtime_array.append(stop-start)
-        frame_draw = frame_gray.copy()
         for rect in rects:
             if face_box is None:
                 face_box = FaceBox(None, frame_gray, args["shape_predictor"], rect)
@@ -106,7 +105,7 @@ def startCameraSteam(vs, detector):
             if check_liveness :
                 print("Real")
                 is_real = True
-        cv2.imshow("Frame", frame)
+        cv2.imshow("Frame", frame_gray)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
         if key == ord("q") or is_real:
