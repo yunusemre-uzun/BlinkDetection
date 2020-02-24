@@ -79,6 +79,7 @@ def startCameraSteam(vs, detector):
     face_detection_runtime_array = []
     is_real = False
     time.sleep(1.0)
+    print(frame)
     while True:
         print("Frame: ", i)
         i+=1
