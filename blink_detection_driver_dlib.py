@@ -89,7 +89,7 @@ def startCameraSteam(vs, detector):
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         # detect faces in the rgb frame
         start = time.time()
-        rects = detector(frame_rgb, 0)
+        rects = detector(frame_gray, 0)
         stop = time.time()
         print("Face detection time:", stop-start)
         frame_draw = frame_gray.copy()
