@@ -72,13 +72,13 @@ def startVideoStream(vs, detector):
     print ("Avg face detection time:" , avg)
 
 def startCameraSteam(vs, detector):
-    frame = vs.read()
     face_box = None
     i = 0
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
     time.sleep(1.0)
+    frame = vs.read()
     print(frame)
     while True:
         print("Frame: ", i)
