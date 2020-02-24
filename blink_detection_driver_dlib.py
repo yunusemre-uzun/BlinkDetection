@@ -85,9 +85,7 @@ def startCameraSteam(detector):
     is_real = False
     time.sleep(1.0)
     for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-	# grab the raw NumPy array representing the image, then initialize the timestamp
-	# and occupied/unoccupied text
-	    image = frame.array
+        image = frame.array
         print("Frame: ", i)
         i+=1
         #frame = imutils.resize(frame, width=450)
