@@ -63,11 +63,11 @@ def startCameraSteam(vs, detector):
     while True:
         start = time.time()
         frame = getFrame(vs, True)
-        p1 = Process(target=processFrame, args=(frame, detector,))
+        p1 = Process(target=processFrame, args=(frame, detector, shape_predictor))
         p1.start()
         time.sleep(0.05)
         frame = getFrame(vs, True)
-        p2 = Process(target=processFrame, args=(frame, detector,))
+        p2 = Process(target=processFrame, args=(frame, detector, shape_predictor))
         p2.start()
         p1.join()
         p2.join()
@@ -86,7 +86,7 @@ def getFrame(vs, camera_stream):
         success, frame = vs.read()
     else:
         frame = vs.read()
-    frame = imutils.resize(frame, width=250)
+    frame = imutils.resize(frame, width=300)
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return frame_gray
 
