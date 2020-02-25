@@ -38,7 +38,7 @@ class FaceBox(object):
             return False
 
         '''
-        blink_detector_response = BlinkDetector.detect(self.id, slef.frame)
+        blink_detector_response = BlinkDetector.detect(self.id, self.frame)
         if blink_detector_response == 2: # Eyes are closed
             print("Closed")
             if not self.is_previos_eye_closed:
