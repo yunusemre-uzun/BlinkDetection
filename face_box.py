@@ -51,6 +51,7 @@ class FaceBox(object):
                 return True
             self.counter = 0   
         else:
+            self.counter = 0
             print("Can not decided")
         return False
     
