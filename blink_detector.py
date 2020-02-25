@@ -52,9 +52,9 @@ class BlinkDetector(object):
         shape = BlinkDetector.getFaceShape(id)
         # extract the left and right eye coordinates, then use the
         # coordinates to compute the eye aspect ratio for both eyes
-        ear = BlinkDetector.getEyeAspectRatio(shape, frame)
+        left_ear, right_ear = BlinkDetector.getEyeAspectRatio(shape, frame)
         # If eye is closed return True
-        if ear < EYE_AR_THRESH:   
+        if left_ear < EYE_AR_THRESH and right_ear < EYE_AR_THRESH:   
            return True
         return False
 
@@ -83,9 +83,7 @@ class BlinkDetector(object):
         cv2.drawContours(frame, [rightEyeHull], -1, (255, 255, 255), 1)
         leftEAR = BlinkDetector.calculateEyeAspectRatio(left_eye)
         rightEAR = BlinkDetector.calculateEyeAspectRatio(right_eye)
-        print("Left: ", leftEAR, "-Right: ", rightEAR)
-        ear = (leftEAR + rightEAR) / 2.0
-        return ear
+        return leftEAR, rightEAR
     
     @staticmethod
     def calculateEyeAspectRatio(eye):
