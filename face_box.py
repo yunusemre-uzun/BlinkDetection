@@ -21,7 +21,7 @@ class FaceBox(object):
         return BlinkDetector.getEyesStatus(self.id, self.frame)
 
     
-    def checkFrame(self, frame):
+    def checkFrame(self):
         '''
         current_left_eye_open, current_right_eye_open = BlinkDetector.getEyesStatus(self.id, self.frame)
         if current_left_eye_open != self.left_open:
@@ -38,20 +38,20 @@ class FaceBox(object):
             return False
 
         '''
-        if BlinkDetector.detect(self.id, frame):
-            print(self.is_previos_eye_closed, ":", self.counter)
-            # If eye is closed
+        blink_detector_response = BlinkDetector.detect(self.id, slef.frame)
+        if blink_detector_response == 2: # Eyes are closed
+            print("Closed")
             if not self.is_previos_eye_closed:
-                # If eye is not closed in previous frame
                 self.is_previos_eye_closed = True
             self.counter += 1
-        elif not self.is_previos_eye_closed :
+        elif blink_detector_response == 1 : # Eyes are opened
+            print("Opened")
+            if self.counter >= EYE_AR_THRESH: # Eyes are completely opened after blink
+                return True
             self.counter = 0   
         else:
-            self.is_previos_eye_closed = False
-        if self.counter >= EYE_AR_CONSEC_FRAMES:
-            return True
-        return False
+            print("Can not decided")
+            return False
     
     def updateRect(self, box, rect=None):
         if rect is None:

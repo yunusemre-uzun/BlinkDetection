@@ -55,8 +55,10 @@ class BlinkDetector(object):
         left_ear, right_ear = BlinkDetector.getEyeAspectRatio(shape, frame)
         # If eye is closed return True
         if left_ear < EYE_AR_THRESH and right_ear < EYE_AR_THRESH:   
-           return True
-        return False
+           return 2
+        elif left_ear > EYE_AR_THRESH and right_ear > EYE_AR_THRESH:
+            return 1
+        return 0
 
     @staticmethod
     def getFaceShape(id):
