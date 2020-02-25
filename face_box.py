@@ -15,38 +15,24 @@ class FaceBox(object):
         self.id = BlinkDetector.registerBox(self)
         self.left_open, self.right_open = self.__getEyesStatus()
         self.is_previos_eye_closed = not (self.left_open and self.right_open)
-        self.liveness_score = 0
+        self.open_counter = 0
     
     def __getEyesStatus(self):
         return BlinkDetector.getEyesStatus(self.id, self.frame)
 
     
     def checkFrame(self):
-        '''
-        current_left_eye_open, current_right_eye_open = BlinkDetector.getEyesStatus(self.id, self.frame)
-        if current_left_eye_open != self.left_open:
-            self.liveness_score += 1
-            self.left_open = current_left_eye_open
-        if current_right_eye_open != self.right_open:
-            self.liveness_score += 1
-            self.right_open = current_right_eye_open
-        print (self.liveness_score)
-        #time.sleep(1.0)
-        if self.liveness_score > LIVENESS_THRESH:
-            return True
-        else:
-            return False
-
-        '''
         blink_detector_response = BlinkDetector.detect(self.id, self.frame)
         if blink_detector_response == 2: # Eyes are closed
             print("Closed")
             if not self.is_previos_eye_closed:
                 self.is_previos_eye_closed = True
             self.counter += 1
+            self.open_counter = 0
         elif blink_detector_response == 1 : # Eyes are opened
             print("Opened")
-            if self.counter >= EYE_AR_THRESH: # Eyes are completely opened after blink
+            self.open_counter += 1
+            if self.counter >= EYE_AR_THRESH and self.open_counter >= EYE_AR_THRESH: # Eyes are completely opened after blink
                 print("Real")
                 return True
             self.counter = 0   
