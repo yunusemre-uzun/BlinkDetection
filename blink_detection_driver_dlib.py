@@ -107,7 +107,7 @@ def startCameraSteam(vs, detector):
             runtime_array.append(stop-start)
             if check_liveness :
                 print("Real")
-                #is_real = True
+                is_real = True
         cv2.imshow("Frame", frame_gray)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
