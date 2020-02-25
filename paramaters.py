@@ -6,6 +6,7 @@ from imutils import face_utils
 
 EYE_AR_THRESH = 0.27
 EYE_AR_CONSEC_FRAMES = 2
+LIVENESS_THRESH = 10
 
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]

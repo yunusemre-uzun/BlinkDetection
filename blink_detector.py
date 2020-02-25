@@ -26,6 +26,28 @@ class BlinkDetector(object):
         return len(BlinkDetector.__registered_face_boxes) - 1
 
     @staticmethod
+    def getEyesStatus(id, frame):
+        shape = BlinkDetector.getFaceShape(id)
+        return BlinkDetector.calculateEyesStatus(shape, frame)
+    
+    @staticmethod
+    def calculateEyesStatus(shape, frame):
+        left_eye = shape[lStart:lEnd]
+        right_eye = shape[rStart:rEnd]
+        leftEAR = BlinkDetector.calculateEyeAspectRatio(left_eye)
+        rightEAR = BlinkDetector.calculateEyeAspectRatio(right_eye)
+        print("Left: ", leftEAR, "-Right: ", rightEAR)
+        if leftEAR > EYE_AR_THRESH:
+            left_eye_open = True
+        else:
+            left_eye_open = False
+        if rightEAR > EYE_AR_THRESH:
+            right_eye_open = True
+        else:
+            right_eye_open = False
+        return left_eye_open, right_eye_open
+
+    @staticmethod
     def detect(id, frame):
         shape = BlinkDetector.getFaceShape(id)
         # extract the left and right eye coordinates, then use the
