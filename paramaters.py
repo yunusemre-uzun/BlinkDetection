@@ -4,7 +4,7 @@ from imutils import face_utils
 # blink and then a second constant for the number of consecutive
 # frames the eye must be below the threshold
 
-EYE_AR_THRESH = 0.25
+EYE_AR_THRESH = 0.20
 EYE_AR_CONSEC_FRAMES = 3
 LIVENESS_THRESH = 10
 
