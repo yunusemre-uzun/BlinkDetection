@@ -59,6 +59,7 @@ def startCameraSteam(vs, detector):
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
+    shape_predictor = dlib.shape_predictor(args["shape_predictor"])
     time.sleep(2.0)
     while True:
         start = time.time()
