@@ -28,6 +28,7 @@ def startVideoStream(vs, detector):
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
+    shape_predictor =  dlib.shape_predictor(args["shape_predictor"])
     while success and not is_real:
         print("Frame: ", i)
         i+=1
@@ -41,12 +42,12 @@ def startVideoStream(vs, detector):
         frame_draw = frame.copy()
         for rect in rects:
             if face_box is None:
-                face_box = FaceBox(None, frame, args["shape_predictor"], rect)
+                face_box = FaceBox(None, frame, shape_predictor, rect)
             else:
                 face_box.updateFrame(frame)
                 face_box.updateRect(None, rect)
             start = time.time()
-            check_liveness = face_box.checkFrame(frame) 
+            check_liveness = face_box.checkFrame() 
             stop = time.time()
             runtime_array.append(stop-start)
             if check_liveness :
@@ -91,8 +92,6 @@ def startCameraSteam(vs, detector):
         start = time.time()
         rects = detector(frame_gray, 0)
         stop = time.time()
-        if stop-start > 1:
-            print("Bottlenecked: ", stop-start)
         face_detection_runtime_array.append(stop-start)
         if len(rects)==0 and face_box is not None:
             face_box = None

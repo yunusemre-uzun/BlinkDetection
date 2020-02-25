@@ -32,34 +32,20 @@ def startVideoStream(vs, detector):
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
+    shape_predictor = dlib.shape_predictor(args["shape_predictor"])
     while success and not is_real:
-        print("Frame: ", i)
-        i+=1
-        frame = imutils.resize(frame, width=450)
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # detect faces in the rgb frame
-        start = time.time()
-        rects = detector(frame_rgb, 0)
-        stop = time.time()
-        face_detection_runtime_array.append(stop-start)
-        frame_draw = frame.copy()
-        for rect in rects:
-            if face_box is None:
-                face_box = FaceBox(None, frame, args["shape_predictor"], rect)
-            else:
-                face_box.updateFrame(frame)
-                face_box.updateRect(None, rect)
-            start = time.time()
-            check_liveness = face_box.checkFrame() 
-            stop = time.time()
-            runtime_array.append(stop-start)
-            if check_liveness :
-                print("Real")
-                is_real = True
+        frame = getFrame(vs, False)
+        p1 = Process(target=processFrame, args=(frame, detector, shape_predictor,))
+        frame = getFrame(vs, False)
+        p2 = Process(target=processFrame, args=(frame, detector, shape_predictor,))
+        p1.start()
+        p2.start()
+        p1.join()
+        p2.join()
         cv2.imshow("Frame", frame)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
-        if key == ord("q"):
+        if key == ord("q") or IS_REAL:
             break  
         success, frame = vs.read()
 
@@ -68,6 +54,7 @@ def startVideoStream(vs, detector):
 
 
 def startCameraSteam(vs, detector):
+    global IS_REAL
     i = 0
     runtime_array = []
     face_detection_runtime_array = []
@@ -75,42 +62,41 @@ def startCameraSteam(vs, detector):
     time.sleep(2.0)
     while True:
         start = time.time()
-        frame = getFrame(vs)
+        frame = getFrame(vs, True)
         p1 = Process(target=processFrame, args=(frame, detector,))
-        time.sleep(0.05)
-        frame = getFrame(vs)
-        p2 = Process(target=processFrame, args=(frame, detector,))
-        time.sleep(0.05)
-        frame = getFrame(vs)
-        p3 = Process(target=processFrame, args=(frame, detector,))
         p1.start()
+        time.sleep(0.05)
+        frame = getFrame(vs, True)
+        p2 = Process(target=processFrame, args=(frame, detector,))
         p2.start()
-        p3.start()
         p1.join()
         p2.join()
-        p3.join()
         end = time.time()
         print("Time elapsed: ", end-start)
         key = cv2.waitKey(1) & 0xFF
         # if the `q` key was pressed, break from the loop
-        if key == ord("q") or is_real:
+        if key == ord("q") or IS_REAL:
             break  
-
     cv2.destroyAllWindows()
     vs.stop()
     avgCalculations(runtime_array, face_detection_runtime_array)
 
-def getFrame(vs):
-    frame = vs.read()
+def getFrame(vs, camera_stream):
+    if not camera_stream:
+        success, frame = vs.read()
+    else:
+        frame = vs.read
     frame = imutils.resize(frame, width=250)
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return frame_gray
 
-def processFrame(frame, detector):
-    rects = detector(frame, 0)
+def processFrame(frame_gray, detector, shape_predictor):
+    global FACE_BOX
+    global IS_REAL
+    rects = detector(frame_gray, 0)
     for rect in rects:
         if FACE_BOX is None:
-            FACE_BOX = FaceBox(None, frame_gray, args["shape_predictor"], rect)
+            FACE_BOX = FaceBox(None, frame_gray, shape_predictor, rect)
         else:
             FACE_BOX.updateFrame(frame_gray)
             FACE_BOX.updateRect(None, rect)
@@ -118,7 +104,7 @@ def processFrame(frame, detector):
         if check_liveness :
             print("Real")
             IS_REAL = True
-    cv2.imshow("Frame", frame)
+    cv2.imshow("Frame", frame_gray)
     return None
 
 def avgCalculations(runtime_array, face_detection_runtime_array):

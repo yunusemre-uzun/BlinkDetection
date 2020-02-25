@@ -47,11 +47,12 @@ class FaceBox(object):
         elif blink_detector_response == 1 : # Eyes are opened
             print("Opened")
             if self.counter >= EYE_AR_THRESH: # Eyes are completely opened after blink
+                print("Real")
                 return True
             self.counter = 0   
         else:
             print("Can not decided")
-            return False
+        return False
     
     def updateRect(self, box, rect=None):
         if rect is None:
