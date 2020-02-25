@@ -12,9 +12,9 @@ class FaceBox(object):
             self.rect = rect
         self.shape_predictor = shape_predictor
         self.counter = 0
-        #self.is_previos_eye_closed = False
         self.id = BlinkDetector.registerBox(self)
         self.left_open, self.right_open = self.__getEyesStatus()
+        self.is_previos_eye_closed = not (self.left_open and self.right_open)
         self.liveness_score = 0
     
     def __getEyesStatus(self):
