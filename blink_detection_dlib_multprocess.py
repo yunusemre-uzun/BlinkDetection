@@ -67,7 +67,6 @@ def startCameraSteam(vs, detector):
         p1 = Process(target=processFrame, args=(frame, detector, shape_predictor))
         p1.start()
         cv2.imshow("Frame", frame)
-        time.sleep(0.05)
         frame = getFrame(vs, True)
         p2 = Process(target=processFrame, args=(frame, detector, shape_predictor))
         p2.start()
