@@ -10,7 +10,7 @@ class FaceBox(object):
             self.rect = dlib.rectangle(box[0], box[1], box[2], box[3])
         else:
             self.rect = rect
-        self.shape_predictor = dlib.shape_predictor(shape_predictor)
+        self.shape_predictor = shape_predictor
         self.counter = 0
         #self.is_previos_eye_closed = False
         self.id = BlinkDetector.registerBox(self)

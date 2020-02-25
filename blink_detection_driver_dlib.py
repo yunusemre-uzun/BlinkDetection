@@ -77,6 +77,8 @@ def startCameraSteam(vs, detector):
     runtime_array = []
     face_detection_runtime_array = []
     is_real = False
+    print("[INFO] Loading shape predictor")
+    shape_predictor =  dlib.shape_predictor(args["shape_predictor"])
     time.sleep(2.0)
     while True:
         frame = vs.read()
@@ -96,7 +98,7 @@ def startCameraSteam(vs, detector):
             face_box = None
         for rect in rects:
             if face_box is None:
-                face_box = FaceBox(None, frame_gray, args["shape_predictor"], rect)
+                face_box = FaceBox(None, frame_gray, shape_predictor, rect)
             else:
                 face_box.updateFrame(frame_gray)
                 face_box.updateRect(None, rect)
