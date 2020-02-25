@@ -5,7 +5,7 @@ from imutils import face_utils
 # frames the eye must be below the threshold
 
 EYE_AR_THRESH = 0.27
-EYE_AR_CONSEC_FRAMES = 2
+EYE_AR_CONSEC_FRAMES = 3
 LIVENESS_THRESH = 10
 
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]

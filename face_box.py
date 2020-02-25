@@ -22,6 +22,7 @@ class FaceBox(object):
 
     
     def checkFrame(self, frame):
+        '''
         current_left_eye_open, current_right_eye_open = BlinkDetector.getEyesStatus(self.id, self.frame)
         if current_left_eye_open != self.left_open:
             self.liveness_score += 1
@@ -51,7 +52,6 @@ class FaceBox(object):
         if self.counter >= EYE_AR_CONSEC_FRAMES:
             return True
         return False
-        '''
     
     def updateRect(self, box, rect=None):
         if rect is None:
