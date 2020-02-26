@@ -4,7 +4,28 @@ from paramaters import *
 import time
 
 class FaceBox(object):
-    def __init__(self, box, frame, shape_predictor, rect=None):
+    def __init__(self, box=None, frame=None, shape_predictor=None, rect=None, dummy=False):
+        if dummy:
+            self.dummy = True
+        else:
+            self.dummy = False
+            self.frame = frame
+            if rect is None:
+                self.rect = dlib.rectangle(box[0], box[1], box[2], box[3])
+            else:
+                self.rect = rect
+            self.shape_predictor = shape_predictor
+            self.counter = 0
+            self.id = BlinkDetector.registerBox(self)
+            self.left_open, self.right_open = self.__getEyesStatus()
+            self.is_previos_eye_closed = not (self.left_open and self.right_open)
+            self.open_counter = 0
+    
+    def isDummy(self):
+        return self.dummy
+
+    def changeState(self, box, frame, shape_predictor, rect):
+        self.dummy = False
         self.frame = frame
         if rect is None:
             self.rect = dlib.rectangle(box[0], box[1], box[2], box[3])
@@ -16,6 +37,7 @@ class FaceBox(object):
         self.left_open, self.right_open = self.__getEyesStatus()
         self.is_previos_eye_closed = not (self.left_open and self.right_open)
         self.open_counter = 0
+        return None
     
     def __getEyesStatus(self):
         return BlinkDetector.getEyesStatus(self.id, self.frame)

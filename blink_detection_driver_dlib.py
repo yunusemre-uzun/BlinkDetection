@@ -25,20 +25,16 @@ def startVideoStream(vs, detector):
     success, frame = vs.read()
     face_box = None
     i = 0
-    runtime_array = []
-    face_detection_runtime_array = []
     is_real = False
     shape_predictor =  dlib.shape_predictor(args["shape_predictor"])
+    start = time.time()
     while success and not is_real:
         print("Frame: ", i)
         i+=1
         frame = imutils.resize(frame, width=450)
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         # detect faces in the rgb frame
-        start = time.time()
         rects = detector(frame_rgb, 0)
-        stop = time.time()
-        face_detection_runtime_array.append(stop-start)
         frame_draw = frame.copy()
         for rect in rects:
             if face_box is None:
@@ -46,10 +42,7 @@ def startVideoStream(vs, detector):
             else:
                 face_box.updateFrame(frame)
                 face_box.updateRect(None, rect)
-            start = time.time()
             check_liveness = face_box.checkFrame() 
-            stop = time.time()
-            runtime_array.append(stop-start)
             if check_liveness :
                 print("Real")
                 is_real = True
@@ -59,18 +52,10 @@ def startVideoStream(vs, detector):
         if key == ord("q"):
             break  
         success, frame = vs.read()
-
+    stop = time.time()
     cv2.destroyAllWindows()
-    sum = 0
-    for runtime in runtime_array:
-        sum += runtime
-    avg = sum / len(runtime_array)
-    print ("Avg blink detection time:" , avg)
-    sum = 0
-    for runtime in face_detection_runtime_array:
-        sum += runtime
-    avg = sum / len(face_detection_runtime_array)
-    print ("Avg face detection time:" , avg)
+    print("Time elapesed: ", stop-start)
+    print("Frame processed: ", i)
 
 def startCameraSteam(vs, detector):
     face_box = None

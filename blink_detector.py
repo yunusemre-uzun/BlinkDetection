@@ -36,7 +36,7 @@ class BlinkDetector(object):
         right_eye = shape[rStart:rEnd]
         leftEAR = BlinkDetector.calculateEyeAspectRatio(left_eye)
         rightEAR = BlinkDetector.calculateEyeAspectRatio(right_eye)
-        print("Left: ", leftEAR, "-Right: ", rightEAR)
+        #print("Left: ", leftEAR, "-Right: ", rightEAR)
         if leftEAR > EYE_AR_THRESH:
             left_eye_open = True
         else:

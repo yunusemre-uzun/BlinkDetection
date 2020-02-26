@@ -1,4 +1,5 @@
-from multiprocessing import Process
+from multiprocessing import Process, Value, Manager
+from multiprocessing.managers import BaseManager
 import argparse
 from imutils.video import FileVideoStream
 from imutils.video import VideoStream
@@ -7,9 +8,6 @@ import cv2
 import time
 import dlib
 import imutils
-
-FACE_BOX = None
-IS_REAL = False
 
 def getVideoStream(args):
     if args["video"]=="":
@@ -25,89 +23,69 @@ def getVideoStream(args):
         print("[INFO] starting video stream thread...")
     return vs, fileStream
 
-def startVideoStream(vs, detector):
-    success, frame = vs.read()
-    face_box = None
-    i = 0
-    runtime_array = []
-    face_detection_runtime_array = []
-    is_real = False
-    shape_predictor = dlib.shape_predictor(args["shape_predictor"])
-    while success and not is_real:
-        frame = getFrame(vs, False)
-        p1 = Process(target=processFrame, args=(frame, detector, shape_predictor,))
-        frame = getFrame(vs, False)
-        p2 = Process(target=processFrame, args=(frame, detector, shape_predictor,))
-        p1.start()
-        p2.start()
-        p1.join()
-        p2.join()
-        cv2.imshow("Frame", frame)
-        key = cv2.waitKey(1) & 0xFF
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q") or IS_REAL:
-            break  
-        success, frame = vs.read()
-
-    cv2.destroyAllWindows()
-    avgCalculations(runtime_array, face_detection_runtime_array)
-
-
-def startCameraSteam(vs, detector):
-    global IS_REAL
-    i = 0
-    runtime_array = []
-    face_detection_runtime_array = []
-    is_real = False
-    shape_predictor = dlib.shape_predictor(args["shape_predictor"])
-    time.sleep(2.0)
-    while True:
-        start = time.time()
-        frame = getFrame(vs, True)
-        p1 = Process(target=processFrame, args=(frame, detector, shape_predictor))
-        p1.start()
-        cv2.imshow("Frame", frame)
-        frame = getFrame(vs, True)
-        p2 = Process(target=processFrame, args=(frame, detector, shape_predictor))
-        p2.start()
-        cv2.imshow("Frame", frame)
-        p1.join()
-        p2.join()
-        end = time.time()
-        print("Time elapsed: ", end-start)
-        key = cv2.waitKey(1) & 0xFF
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q") or IS_REAL:
-            break  
-    cv2.destroyAllWindows()
-    vs.stop()
-    avgCalculations(runtime_array, face_detection_runtime_array)
-
 def getFrame(vs, camera_stream):
     if not camera_stream:
         success, frame = vs.read()
+        if not success:
+            return None
     else:
         frame = vs.read()
     frame = imutils.resize(frame, width=300)
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return frame_gray
 
-def processFrame(frame_gray, detector, shape_predictor):
-    global FACE_BOX
-    global IS_REAL
+def startVideoStream(vs, detector):
+    frame_counter = 0
+    # Read the first frame
+    frame = getFrame(vs, False)
+    is_real = Value('c', 0)
+    manager = BaseManager()
+    manager.start()
+    face_box = manager.FaceBox(dummy=True)
+    process_array = []
+    #Initialize dlib's shape predictor to decide landmarks on face
+    shape_predictor = dlib.shape_predictor(args["shape_predictor"])
+    start = time.time()
+    while frame is not None:
+        # We have 4 core system, so create max 3 processes
+        frame = getFrame(vs, False)
+        frame_counter += 1
+        # Create a new os process to process frame
+        if len(process_array) == 3:
+            process_array[0].join()
+            del process_array[0]
+        new_process = Process(target=processFrame, args=(frame, detector, shape_predictor, frame_counter, is_real,face_box,))
+        new_process.start()
+        process_array.append(new_process)
+        key = cv2.waitKey(1) & 0xFF
+        # if the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break 
+        with is_real.get_lock():
+            if is_real == 1:
+                break
+    end = time.time()
+    print("Time elapsed: ", end-start)
+    print("Frames processed: ", frame_counter)
+
+    cv2.destroyAllWindows()
+    #avgCalculations(runtime_array, face_detection_runtime_array)
+
+def processFrame(frame_gray, detector, shape_predictor, frame_counter, is_real, face_box):
     rects = detector(frame_gray, 0)
     for rect in rects:
-        if FACE_BOX is None:
-            FACE_BOX = FaceBox(None, frame_gray, shape_predictor, rect)
+        if face_box.isDummy():
+            face_box.changeState(None, frame_gray, shape_predictor, rect)
         else:
-            FACE_BOX.updateFrame(frame_gray)
-            FACE_BOX.updateRect(None, rect)
-        check_liveness = FACE_BOX.checkFrame() 
+            face_box.updateFrame(frame_gray)
+            face_box.updateRect(None, rect)
+        check_liveness = face_box.checkFrame() 
         if check_liveness :
             print("Real")
-            IS_REAL = True
+        with is_real.get_lock():
+            is_real = 1
     cv2.imshow("Frame", frame_gray)
-    return None
+    return False
 
 def avgCalculations(runtime_array, face_detection_runtime_array):
     sum = 0
@@ -135,6 +113,7 @@ def main(args):
     
 
 if __name__ == "__main__":
+    BaseManager.register('FaceBox', FaceBox)
     ap = argparse.ArgumentParser()
     ap.add_argument("-p", "--shape-predictor", required=True,
         help="path to facial landmark predictor")
