@@ -99,7 +99,7 @@ def startCameraStream(vs, detector):
     while frame is not None:
         print("Frame read: ", frame_counter)
         cv2.imshow("Frame", frame)
-        time.sleep(1/20)
+        time.sleep(1/10)
         frame_queue.put(frame)
         print(frame_queue.qsize())
         frame_counter += 1
