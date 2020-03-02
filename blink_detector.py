@@ -3,7 +3,6 @@ from paramaters import *
 import math
 import cv2
 
-
 class BlinkDetector(object):
     __instance = None
     __registered_face_boxes = []
