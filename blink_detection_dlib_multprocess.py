@@ -113,6 +113,7 @@ def startCameraStream(vs, detector):
                 print("Real")
                 break
         frame = getFrame(vs, True)
+        time.sleep(1/19)
     end = time.time()
     p1.join()
     p2.join()
