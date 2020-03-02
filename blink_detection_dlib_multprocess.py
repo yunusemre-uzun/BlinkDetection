@@ -31,7 +31,7 @@ def getFrame(vs, camera_stream):
             return None
     else:
         frame = vs.read()
-    frame = imutils.resize(frame, width=300)
+    frame = imutils.resize(frame, width=250)
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return frame_gray
 
