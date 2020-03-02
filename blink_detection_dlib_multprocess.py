@@ -12,7 +12,7 @@ import imutils
 def getVideoStream(args):
     if args["video"]=="":
         # Choose the camera as default
-        vs = VideoStream(usePiCamera=True, resolution=(320,240), framerate=20).start()
+        vs = VideoStream(usePiCamera=True).start()
         #vs = VideoStream(0).start()
         fileStream = False
         print("[INFO] starting camera capturing")
@@ -31,7 +31,7 @@ def getFrame(vs, camera_stream):
             return None
     else:
         frame = vs.read()
-    #frame = imutils.resize(frame, width=250)
+    frame = imutils.resize(frame, width=250)
     frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     return frame_gray
 
