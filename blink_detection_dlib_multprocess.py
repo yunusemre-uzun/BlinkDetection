@@ -119,7 +119,7 @@ def startCameraStream(vs, detector):
 def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue):
     while True:
         try:
-            frame = frame_queue.get(block=True, timeout=0.05)
+            frame = frame_queue.get(block=True, timeout=0.06)
         except:
             return None
         processFrame(frame, detector, shape_predictor, is_real, face_box)
