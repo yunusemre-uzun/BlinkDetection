@@ -122,6 +122,7 @@ def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue):
             frame = frame_queue.get(block=True, timeout=0.05)
         except:
             return None
+        print("Frame read by process")
         processFrame(frame, detector, shape_predictor, is_real, face_box)
 
 
