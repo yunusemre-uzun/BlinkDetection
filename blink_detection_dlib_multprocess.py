@@ -122,7 +122,6 @@ def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue):
             frame = frame_queue.get(block=True, timeout=0.05)
         except:
             return None
-        print("Frame read by process")
         processFrame(frame, detector, shape_predictor, is_real, face_box)
 
 
@@ -135,11 +134,11 @@ def processFrame(frame_gray, detector, shape_predictor, is_real, face_box):
             face_box.updateFrame(frame_gray)
             face_box.updateRect(None, rect)
         check_liveness = face_box.checkFrame()
-        cv2.imshow("Frame", frame) 
         if check_liveness :
             print("Real")
             with is_real.get_lock():
                 is_real.value = True
+    cv2.imshow("Frame", frame) 
     return False
 
 def avgCalculations(runtime_array, face_detection_runtime_array):
