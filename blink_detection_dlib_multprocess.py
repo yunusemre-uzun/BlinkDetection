@@ -96,6 +96,7 @@ def startCameraStream(vs, detector):
     start = time.time()
     while frame is not None:
         print("Frame read: ", frame_counter)
+        cv2.imshow("Frame", frame)
         time.sleep(1/20)
         frame_queue.put(frame)
         frame_counter += 1
@@ -137,8 +138,7 @@ def processFrame(frame_gray, detector, shape_predictor, is_real, face_box):
         if check_liveness :
             print("Real")
             with is_real.get_lock():
-                is_real.value = True
-    cv2.imshow("Frame", frame_gray) 
+                is_real.value = True 
     return False
 
 def avgCalculations(runtime_array, face_detection_runtime_array):
