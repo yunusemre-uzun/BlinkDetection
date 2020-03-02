@@ -103,7 +103,7 @@ def startCameraStream(vs, detector):
         print("Frame read: ", frame_counter)
         cv2.imshow("Frame", frame)
         frame_queue.put(frame)
-        if frame_queue.qsize() > 3:
+        while frame_queue.qsize() > 3:
             print("Bottleneck detected")
             time.sleep(0.05)
         frame_counter += 1
