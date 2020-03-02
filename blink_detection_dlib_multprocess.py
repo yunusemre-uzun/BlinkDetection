@@ -74,6 +74,45 @@ def startVideoStream(vs, detector):
     cv2.destroyAllWindows()
     #avgCalculations(runtime_array, face_detection_runtime_array)
 
+def startCameraStream(vs, detector):
+    frame_counter = 0
+    # Read the first frame
+    frame = getFrame(vs, True)
+    is_real = Value('i', False)
+    manager = BaseManager()
+    manager.start()
+    face_box = manager.FaceBox(dummy=True)
+    frame_queue = Queue()
+    frame_queue.put(frame)
+    #Initialize dlib's shape predictor to decide landmarks on face
+    shape_predictor = dlib.shape_predictor(args["shape_predictor"])
+    p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
+    p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
+    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
+    p1.start()
+    p2.start()
+    p3.start()
+    start = time.time()
+    while frame is not None:
+        frame_queue.put(frame)
+        frame_counter += 1
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord("q"):
+            break 
+        with is_real.get_lock():
+            if is_real.value:
+                print("Real")
+                break
+        frame = getFrame(vs, True)
+    p1.join()
+    p2.join()
+    p3.join()
+    end = time.time()
+    print("Time elapsed: ", end-start)
+    print("Frames processed: ", frame_counter)
+
+    cv2.destroyAllWindows()
+
 def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue):
     while True:
         try:
