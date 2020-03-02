@@ -28,7 +28,7 @@ def startVideoStream(vs, detector):
     is_real = False
     shape_predictor =  dlib.shape_predictor(args["shape_predictor"])
     start = time.time()
-    while success and not is_real:
+    while success :
         print("Frame: ", i)
         i+=1
         frame = imutils.resize(frame, width=450)
