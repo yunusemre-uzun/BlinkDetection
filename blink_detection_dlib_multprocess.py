@@ -100,8 +100,9 @@ def startCameraStream(vs, detector):
     while frame is not None:
         print("Frame read: ", frame_counter)
         cv2.imshow("Frame", frame)
-        time.sleep(1/19)
         frame_queue.put(frame)
+        if frame_queue.qsize() > 3:
+            time.sleep(1/19)
         print(frame_queue.qsize())
         frame_counter += 1
         key = cv2.waitKey(1) & 0xFF
@@ -112,12 +113,13 @@ def startCameraStream(vs, detector):
                 print("Real")
                 #break
         frame = getFrame(vs, True)
+    end = time.time()
     p1.join()
     p2.join()
     p3.join()
-    end = time.time()
     print("Time elapsed: ", end-start)
-    print("Frames processed: ", frame_counter)
+    #print("Frames processed: ", frame_counter)
+    print("FPS: ", frame_counter/(end-start))
 
     cv2.destroyAllWindows()
 
