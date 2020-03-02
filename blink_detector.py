@@ -24,6 +24,11 @@ class BlinkDetector(object):
     def registerBox(face_box):
         BlinkDetector.__registered_face_boxes.append([face_box])
         return len(BlinkDetector.__registered_face_boxes) - 1
+    
+    @staticmethod
+    def deRegisterBox(id):
+        BlinkDetector.__registered_face_boxes.pop(id)
+        return None
 
     @staticmethod
     def getEyesStatus(id, frame):

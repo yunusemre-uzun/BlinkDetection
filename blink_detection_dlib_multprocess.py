@@ -12,7 +12,7 @@ import imutils
 def getVideoStream(args):
     if args["video"]=="":
         # Choose the camera as default
-        vs = VideoStream(usePiCamera=True).start()
+        vs = VideoStream(0).start()
         fileStream = False
         print("[INFO] starting camera capturing")
         #vs = None
@@ -41,11 +41,11 @@ def startVideoStream(vs, detector):
     is_real = Value('i', False)
     manager = BaseManager()
     manager.start()
-    face_box = manager.FaceBox(dummy=True)
     frame_queue = Queue()
     frame_queue.put(frame)
     #Initialize dlib's shape predictor to decide landmarks on face
     shape_predictor = dlib.shape_predictor(args["shape_predictor"])
+    face_box = manager.FaceBox(shape_predictor=shape_predictor, frame = frame)
     p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,1,))
     p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,2,))
     p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,3,))
@@ -84,22 +84,22 @@ def startCameraStream(vs, detector):
     is_real = Value('i', False)
     manager = BaseManager()
     manager.start()
-    face_box = manager.FaceBox(dummy=True)
     frame_queue = Queue()
     frame_queue.put(frame)
     #Initialize dlib's shape predictor to decide landmarks on face
     shape_predictor = dlib.shape_predictor(args["shape_predictor"])
+    face_box = manager.FaceBox(shape_predictor=shape_predictor, frame=frame)
     p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,1,))
     p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,2,))
-    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,3,))
+    #p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,3,))
     p1.start()
     p2.start()
-    p3.start()
+    #p3.start()
     start = time.time()
     while frame is not None:
         print("Frame read: ", frame_counter)
         cv2.imshow("Frame", frame)
-        time.sleep(1/10)
+        time.sleep(1/19)
         frame_queue.put(frame)
         print(frame_queue.qsize())
         frame_counter += 1
@@ -109,11 +109,11 @@ def startCameraStream(vs, detector):
         with is_real.get_lock():
             if is_real.value:
                 print("Real")
-                break
+                #break
         frame = getFrame(vs, True)
     p1.join()
     p2.join()
-    p3.join()
+    #p3.join()
     end = time.time()
     print("Time elapsed: ", end-start)
     print("Frames processed: ", frame_counter)
@@ -127,21 +127,16 @@ def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue,proce
             print("Process{} got frame".format(process_id))
         except:
             return None
-        processFrame(frame, detector, shape_predictor, is_real, face_box)
+        processFrame(frame, detector, shape_predictor, is_real, face_box, process_id)
 
 
-def processFrame(frame_gray, detector, shape_predictor, is_real, face_box):
+def processFrame(frame_gray, detector, shape_predictor, is_real, face_box, id):
     rects = detector(frame_gray, 0)
     for rect in rects:
-        print("Face detected")
-        if face_box.isDummy():
-            face_box.changeState(None, frame_gray, shape_predictor, rect)
-        else:
-            face_box.updateFrame(frame_gray)
-            face_box.updateRect(None, rect)
+        face_box.updateFrame(frame_gray)
+        face_box.updateRect(None, rect)
         check_liveness = face_box.checkFrame()
         if check_liveness :
-            print("Real")
             with is_real.get_lock():
                 is_real.value = True 
     return False

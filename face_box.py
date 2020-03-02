@@ -4,46 +4,41 @@ from paramaters import *
 import time
 
 class FaceBox(object):
-    def __init__(self, box=None, frame=None, shape_predictor=None, rect=None, dummy=False):
-        if dummy:
-            self.dummy = True
-        else:
-            self.dummy = False
-            self.frame = frame
-            if rect is None:
-                self.rect = dlib.rectangle(box[0], box[1], box[2], box[3])
-            else:
-                self.rect = rect
-            self.shape_predictor = shape_predictor
-            self.counter = 0
-            self.id = BlinkDetector.registerBox(self)
-            self.left_open, self.right_open = self.__getEyesStatus()
-            self.is_previos_eye_closed = not (self.left_open and self.right_open)
-            self.open_counter = 0
-    
-    def isDummy(self):
-        return self.dummy
-
-    def changeState(self, box, frame, shape_predictor, rect):
-        self.dummy = False
+    def __init__(self, box=None, frame=None, shape_predictor=None, rect=None):
         self.frame = frame
-        if rect is None:
+        if rect is None and box is not None:
             self.rect = dlib.rectangle(box[0], box[1], box[2], box[3])
-        else:
+        elif rect is not None:
             self.rect = rect
         self.shape_predictor = shape_predictor
         self.counter = 0
         self.id = BlinkDetector.registerBox(self)
-        self.left_open, self.right_open = self.__getEyesStatus()
-        self.is_previos_eye_closed = not (self.left_open and self.right_open)
+        self.left_open, self.right_open = False, False
+        self.is_previos_eye_closed = False
         self.open_counter = 0
-        return None
+        self.registered = True
+    
+    def deRegister(self):
+        self.registered = False
+        return BlinkDetector.deRegisterBox(self.id)
+    
+    def register(self):
+        if self.registered:
+            return self.id
+            return False
+        else:
+            self.id = BlinkDetector.registerBox(self)
+            return True
     
     def __getEyesStatus(self):
         return BlinkDetector.getEyesStatus(self.id, self.frame)
 
     
     def checkFrame(self):
+        # To prevent not registered boxes to check
+        if not self.registered :
+            raise "Face box is not registered"
+            return False
         blink_detector_response = BlinkDetector.detect(self.id, self.frame)
         if blink_detector_response == 2: # Eyes are closed
             #print("Closed")
