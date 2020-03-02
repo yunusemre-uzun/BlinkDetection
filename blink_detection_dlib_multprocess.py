@@ -133,6 +133,7 @@ def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue,proce
 def processFrame(frame_gray, detector, shape_predictor, is_real, face_box):
     rects = detector(frame_gray, 0)
     for rect in rects:
+        print("Face detected")
         if face_box.isDummy():
             face_box.changeState(None, frame_gray, shape_predictor, rect)
         else:
