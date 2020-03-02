@@ -95,6 +95,8 @@ def startCameraStream(vs, detector):
     p3.start()
     start = time.time()
     while frame is not None:
+        print("Frame read: ", frame_counter)
+        time.sleep(1/20)
         frame_queue.put(frame)
         frame_counter += 1
         key = cv2.waitKey(1) & 0xFF
