@@ -138,7 +138,7 @@ def processFrame(frame_gray, detector, shape_predictor, is_real, face_box):
             print("Real")
             with is_real.get_lock():
                 is_real.value = True
-    cv2.imshow("Frame", frame) 
+    cv2.imshow("Frame", frame_gray) 
     return False
 
 def avgCalculations(runtime_array, face_detection_runtime_array):
