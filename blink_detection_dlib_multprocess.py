@@ -87,9 +87,9 @@ def startCameraStream(vs, detector):
     frame_queue.put(frame)
     #Initialize dlib's shape predictor to decide landmarks on face
     shape_predictor = dlib.shape_predictor(args["shape_predictor"])
-    p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
-    p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
-    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
+    p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,1,))
+    p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,2,))
+    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,3))
     p1.start()
     p2.start()
     p3.start()
@@ -117,10 +117,11 @@ def startCameraStream(vs, detector):
 
     cv2.destroyAllWindows()
 
-def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue):
+def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue,process_id):
     while True:
         try:
             frame = frame_queue.get(block=True, timeout=0.06)
+            print("Process{} got frame".format(process_id))
         except:
             return None
         processFrame(frame, detector, shape_predictor, is_real, face_box)
