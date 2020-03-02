@@ -111,7 +111,7 @@ def startCameraStream(vs, detector):
         with is_real.get_lock():
             if is_real.value:
                 print("Real")
-                #break
+                break
         frame = getFrame(vs, True)
     end = time.time()
     p1.join()
