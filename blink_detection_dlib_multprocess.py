@@ -133,7 +133,8 @@ def processFrame(frame_gray, detector, shape_predictor, is_real, face_box):
         else:
             face_box.updateFrame(frame_gray)
             face_box.updateRect(None, rect)
-        check_liveness = face_box.checkFrame() 
+        check_liveness = face_box.checkFrame()
+        cv2.imshow("Frame", frame) 
         if check_liveness :
             print("Real")
             with is_real.get_lock():
