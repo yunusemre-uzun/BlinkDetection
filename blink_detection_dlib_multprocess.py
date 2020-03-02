@@ -117,20 +117,20 @@ def startCameraStream(vs, detector):
         frame = getFrame(vs, True)
         #time.sleep(0.05)
     end = time.time()
+    print("FPS: ", frame_counter/(end-start))
     p1.join()
     p2.join()
     p3.join()
     p4.join()
     print("Time elapsed: ", end-start)
     #print("Frames processed: ", frame_counter)
-    print("FPS: ", frame_counter/(end-start))
 
     cv2.destroyAllWindows()
 
 def waitForFrame(detector, shape_predictor, is_real, face_box, frame_queue,process_id):
     while True:
         try:
-            frame = frame_queue.get(block=True, timeout=0.5)
+            frame = frame_queue.get(block=True, timeout=1)
             print("Process{} got frame".format(process_id))
         except:
             return None
