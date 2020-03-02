@@ -89,7 +89,7 @@ def startCameraStream(vs, detector):
     shape_predictor = dlib.shape_predictor(args["shape_predictor"])
     p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,1,))
     p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,2,))
-    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,3))
+    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,3,))
     p1.start()
     p2.start()
     p3.start()
