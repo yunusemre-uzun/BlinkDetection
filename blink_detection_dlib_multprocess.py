@@ -76,6 +76,7 @@ def startVideoStream(vs, detector):
 
 def startCameraStream(vs, detector):
     frame_counter = 0
+    time.sleep(2.0)
     # Read the first frame
     frame = getFrame(vs, True)
     is_real = Value('i', False)
@@ -159,7 +160,7 @@ def main(args):
     if(file_stream):
         startVideoStream(vs, detector)
     else:
-        startCameraSteam(vs, detector)
+        startCameraStream(vs, detector)
     
 
 if __name__ == "__main__":
