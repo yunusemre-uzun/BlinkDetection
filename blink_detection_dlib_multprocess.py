@@ -46,15 +46,16 @@ def startVideoStream(vs, detector):
     frame_queue.put(frame)
     #Initialize dlib's shape predictor to decide landmarks on face
     shape_predictor = dlib.shape_predictor(args["shape_predictor"])
-    p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
-    p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
-    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue))
+    p1 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,1,))
+    p2 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,2,))
+    p3 = Process(target=waitForFrame, args=(detector, shape_predictor, is_real,face_box, frame_queue,3,))
     p1.start()
     p2.start()
     p3.start()
     start = time.time()
     while frame is not None:
         frame_queue.put(frame)
+        print(frame_queue.qsize())
         frame_counter += 1
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
@@ -64,6 +65,7 @@ def startVideoStream(vs, detector):
                 print("Real")
                 break
         frame = getFrame(vs, False)
+        time.sleep(1/20)
     p1.join()
     p2.join()
     p3.join()
@@ -99,6 +101,7 @@ def startCameraStream(vs, detector):
         cv2.imshow("Frame", frame)
         time.sleep(1/20)
         frame_queue.put(frame)
+        print(frame_queue.qsize())
         frame_counter += 1
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
