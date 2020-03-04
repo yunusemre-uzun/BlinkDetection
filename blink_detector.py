@@ -24,7 +24,7 @@ class BlinkDetector(object):
         facebox_id = random.getrandbits(8)
         while facebox_id in BlinkDetector.__registered_face_boxes:
             facebox_id = random.getrandbits(8)
-        self.__registered_face_boxes[facebox_id] = facebox_id
+        self.__registered_face_boxes[facebox_id] = face_box
         return facebox_id
     
     def deRegisterBox(self, id):
@@ -44,16 +44,16 @@ class BlinkDetector(object):
         return 0
 
     def getFaceShape(self, id):
-        face_box = BlinkDetector.get_face_box(id)
-        frame_rgb = face_box[0].frame
-        rect = face_box[0].rect
-        predictor = face_box[0].shape_predictor
+        face_box = self.getFaceBox(id)
+        frame_rgb = face_box.frame
+        rect = face_box.rect
+        predictor = face_box.shape_predictor
         shape = predictor(frame_rgb, rect)
         shape = face_utils.shape_to_np(shape)
         return shape
 
     
-    def get_face_box(self, id):
+    def getFaceBox(self, id):
         return BlinkDetector.__registered_face_boxes[id]
     
     def getEyeAspectRatio(self, shape, frame):

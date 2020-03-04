@@ -13,7 +13,7 @@ class FaceBox(object):
         self.shape_predictor = shape_predictor
         self.__loadDefault()
     
-    def __loadDefault():
+    def __loadDefault(self):
         self.counter = 0
         self.blink_detector = BlinkDetector.getInstance()
         self.id = self.blink_detector.registerBox(self)
