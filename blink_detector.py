@@ -2,10 +2,11 @@ from imutils import face_utils
 from paramaters import *
 import math
 import cv2
+import random
 
 class BlinkDetector(object):
     __instance = None
-    __registered_face_boxes = []
+    __registered_face_boxes = {}
 
     @staticmethod
     def getInstance():
@@ -19,44 +20,22 @@ class BlinkDetector(object):
         else:
             BlinkDetector.__instance = self
 
-    @staticmethod
-    def registerBox(face_box):
-        BlinkDetector.__registered_face_boxes.append([face_box])
-        return len(BlinkDetector.__registered_face_boxes) - 1
+    def registerBox(self, face_box):
+        facebox_id = random.getrandbits(8)
+        while facebox_id in BlinkDetector.__registered_face_boxes:
+            facebox_id = random.getrandbits(8)
+        self.__registered_face_boxes[facebox_id] = facebox_id
+        return facebox_id
     
-    @staticmethod
-    def deRegisterBox(id):
-        BlinkDetector.__registered_face_boxes.pop(id)
+    def deRegisterBox(self, id):
+        del self.__registered_face_boxes[id]
         return None
 
-    @staticmethod
-    def getEyesStatus(id, frame):
-        shape = BlinkDetector.getFaceShape(id)
-        return BlinkDetector.calculateEyesStatus(shape, frame)
-    
-    @staticmethod
-    def calculateEyesStatus(shape, frame):
-        left_eye = shape[lStart:lEnd]
-        right_eye = shape[rStart:rEnd]
-        leftEAR = BlinkDetector.calculateEyeAspectRatio(left_eye)
-        rightEAR = BlinkDetector.calculateEyeAspectRatio(right_eye)
-        #print("Left: ", leftEAR, "-Right: ", rightEAR)
-        if leftEAR > EYE_AR_THRESH:
-            left_eye_open = True
-        else:
-            left_eye_open = False
-        if rightEAR > EYE_AR_THRESH:
-            right_eye_open = True
-        else:
-            right_eye_open = False
-        return left_eye_open, right_eye_open
-
-    @staticmethod
-    def detect(id, frame):
-        shape = BlinkDetector.getFaceShape(id)
+    def detect(self, id, frame):
+        shape = self.getFaceShape(id)
         # extract the left and right eye coordinates, then use the
         # coordinates to compute the eye aspect ratio for both eyes
-        left_ear, right_ear = BlinkDetector.getEyeAspectRatio(shape, frame)
+        left_ear, right_ear = self.getEyeAspectRatio(shape, frame)
         # If eye is closed return True
         if left_ear < EYE_AR_THRESH and right_ear < EYE_AR_THRESH:   
            return 2
@@ -64,8 +43,7 @@ class BlinkDetector(object):
             return 1
         return 0
 
-    @staticmethod
-    def getFaceShape(id):
+    def getFaceShape(self, id):
         face_box = BlinkDetector.get_face_box(id)
         frame_rgb = face_box[0].frame
         rect = face_box[0].rect
@@ -75,32 +53,29 @@ class BlinkDetector(object):
         return shape
 
     
-    @staticmethod
-    def get_face_box(id):
+    def get_face_box(self, id):
         return BlinkDetector.__registered_face_boxes[id]
     
-    @staticmethod
-    def getEyeAspectRatio(shape, frame):
+    def getEyeAspectRatio(self, shape, frame):
         left_eye = shape[lStart:lEnd]
         right_eye = shape[rStart:rEnd]
         leftEyeHull = cv2.convexHull(left_eye)
         rightEyeHull = cv2.convexHull(right_eye)
         cv2.drawContours(frame, [leftEyeHull], -1, (255, 255, 255), 1)
         cv2.drawContours(frame, [rightEyeHull], -1, (255, 255, 255), 1)
-        leftEAR = BlinkDetector.calculateEyeAspectRatio(left_eye)
-        rightEAR = BlinkDetector.calculateEyeAspectRatio(right_eye)
+        leftEAR = self.calculateEyeAspectRatio(left_eye)
+        rightEAR = self.calculateEyeAspectRatio(right_eye)
         return leftEAR, rightEAR
     
-    @staticmethod
-    def calculateEyeAspectRatio(eye):
-        vertical_distance_1 = BlinkDetector.calculateEuclidianDistance2DPoints(eye[1], eye[5])
-        vertical_distance_2 = BlinkDetector.calculateEuclidianDistance2DPoints(eye[2], eye[4])
-        horizontal_distance = BlinkDetector.calculateEuclidianDistance2DPoints(eye[0], eye[3])
+    def calculateEyeAspectRatio(self, eye):
+        vertical_distance_1 = self.calculateEuclidianDistance2DPoints(eye[1], eye[5])
+        vertical_distance_2 = self.calculateEuclidianDistance2DPoints(eye[2], eye[4])
+        horizontal_distance = self.calculateEuclidianDistance2DPoints(eye[0], eye[3])
         # compute the eye aspect ratio
         ear = (vertical_distance_1 + vertical_distance_2) / (2.0 * horizontal_distance)
         return ear
     
-    def calculateEuclidianDistance2DPoints(point_1, point_2):
+    def calculateEuclidianDistance2DPoints(self, point_1, point_2):
         tmp_1 = point_1[0] - point_2[0]
         tmp_2 = point_1[1] - point_2[1]
         return math.sqrt(math.pow(tmp_1,2)+math.pow(tmp_2,2))
