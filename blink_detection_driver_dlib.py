@@ -7,129 +7,115 @@ import time
 import dlib
 import imutils
 
-def getVideoStream(args):
-    if args["video"]=="":
-        # Choose the camera as default
-        vs = VideoStream(usePiCamera=True).start()
-        fileStream = False
-        print("[INFO] starting camera capturing")
-        #vs = None
-    else:
-        # Choose the given video file
-        vs = cv2.VideoCapture(args["video"])
-        fileStream = True
-        print("[INFO] starting video stream thread...")
-    return vs, fileStream
+class Driver(object):
+    __environment = None
+    __file_stream = None
+    __detector = None
+    __shape_predictor = None
+    __vs = None
+    __face_box = None
+    __is_real = False
 
-def startVideoStream(vs, detector):
-    success, frame = vs.read()
-    face_box = None
-    i = 0
-    is_real = False
-    shape_predictor =  dlib.shape_predictor(args["shape_predictor"])
-    start = time.time()
-    while success :
-        print("Frame: ", i)
-        i+=1
-        frame = imutils.resize(frame, width=450)
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # detect faces in the rgb frame
-        rects = detector(frame_rgb, 0)
-        frame_draw = frame.copy()
-        for rect in rects:
-            if face_box is None:
-                face_box = FaceBox(None, frame, shape_predictor, rect)
+    def __init__(self, shape_predictor, video_path="", environment="pc"):
+        print("[INFO] loading facial landmark predictor...")
+        self.__shape_predictor = dlib.shape_predictor(args["shape_predictor"])
+        self.__face_box = FaceBox(shape_predictor=shape_predictor, frame=frame)
+        self.__environment = environment
+
+    def getVideoStream(video_path):
+        '''
+            Creates VideoStream object, returns object and stream flag as True if file stream enabled. 
+            :param args: args of the main program
+        '''
+        if video_path=="":
+            if Driver.__environment == "pi":
+                # Choose raspberry pi cam
+                vs = VideoStream(usePiCamera=True, framerate=20, resolution=(480,480)).start()
             else:
-                face_box.updateFrame(frame)
-                face_box.updateRect(None, rect)
-            check_liveness = face_box.checkFrame() 
-            if check_liveness :
-                print("Real")
-                is_real = True
-        cv2.imshow("Frame", frame)
-        key = cv2.waitKey(1) & 0xFF
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q"):
-            break  
-        success, frame = vs.read()
-    stop = time.time()
-    cv2.destroyAllWindows()
-    print("Time elapesed: ", stop-start)
-    print("Frame processed: ", i)
-
-def startCameraSteam(vs, detector):
-    face_box = None
-    i = 0
-    runtime_array = []
-    face_detection_runtime_array = []
-    is_real = False
-    print("[INFO] Loading shape predictor")
-    shape_predictor =  dlib.shape_predictor(args["shape_predictor"])
-    time.sleep(2.0)
-    while True:
-        frame = vs.read()
-        frame = imutils.resize(frame, width=200)
-        print("Frame: ", i)
-        i+=1
-        #frame = imutils.resize(frame, width=450)
-        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # detect faces in the rgb frame
-        start = time.time()
-        rects = detector(frame_gray, 0)
-        stop = time.time()
-        face_detection_runtime_array.append(stop-start)
-        if len(rects)==0 and face_box is not None:
-            face_box = None
-        for rect in rects:
-            if face_box is None:
-                face_box = FaceBox(None, frame_gray, shape_predictor, rect)
-            else:
-                face_box.updateFrame(frame_gray)
-                face_box.updateRect(None, rect)
-            start = time.time()
-            check_liveness = face_box.checkFrame() 
-            stop = time.time()
-            runtime_array.append(stop-start)
-            if check_liveness :
-                print("Real")
-                is_real = True
-        cv2.imshow("Frame", frame_gray)
-        key = cv2.waitKey(1) & 0xFF
-        # if the `q` key was pressed, break from the loop
-        if key == ord("q") or is_real:
-            break  
-
-    cv2.destroyAllWindows()
-    vs.stop()
-    sum = 0
-    for runtime in runtime_array:
-        sum += runtime
-    avg = sum / len(runtime_array)
-    print ("Avg blink detection time:" , avg)
-    sum = 0
-    for runtime in face_detection_runtime_array:
-        sum += runtime
-    avg = sum / len(face_detection_runtime_array)
-    print ("Avg face detection time:" , avg)
-
-def main(args):
-    print("[INFO] loading facial landmark predictor...")
-    # Load mtcnn detector from facenet
-    detector = dlib.get_frontal_face_detector()
-    vs, file_stream = getVideoStream(args)
-    # Read the first frame
-    if(file_stream):
-        startVideoStream(vs, detector)
-    else:
-        startCameraSteam(vs, detector)
+                # Choose webcam
+                vs = VideoStream(0, resolution=(1920,1080), framerate=60).start()
+            self.__file_tream = False
+            print("[INFO] starting camera capturing")
+            # Sleep to let camera to warm up
+            time.sleep(2.0)
+        else:
+            # Choose the given video file
+            vs = cv2.VideoCapture(video_path)
+            self.__file_stream = True
+            print("[INFO] starting video stream thread...")
+        return vs
     
+    def getFrame():
+        ''' 
+            Read the next frame from the camera, returns the gray scale image with width 250 pixels
+            :param vs: VideoStream object from imutils, camera_stream: True if the camera is being used
+        '''
+        if self.__file_stream :
+            success, frame = self.__vs.read()
+            if not success:
+                return None
+        else:
+            frame = self.__vs.read()
+        if Driver.__environment == "pi":
+            frame = imutils.resize(frame, width=300)
+        frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        return frame_gray
+
+    def startDetection():
+        frame = getFrame(vs)
+        start = time.time()
+        self.detectionLoop()
+        end = time.time()
+        print("FPS: ", frame_counter/(end-start))
+        print("Time elapsed: ", end-start)
+        #print("Frames processed: ", frame_counter)
+        cv2.destroyAllWindows()
+
+    def detectionLoop():
+        frame_counter = 0
+        while frame is not None:
+            print("Frame read: ", frame_counter)
+            self.processFrame(frame)
+            frame_counter += 1
+            key = cv2.waitKey(1) & 0xFF
+            if key == ord("q"):
+                break 
+            if self.__is_real:
+                print("Real")
+                self.__face_box.deRegister()
+                time.sleep(0.5)
+            frame = Driver.getFrame()
+        return frame_counter
+    
+    def processFrame(frame_gray):
+        rects = self.__detector(frame_gray, 0)
+        if len(rects) and not self.__face_box.registered:
+            self.__face_box.register()
+        for rect in rects:
+            self.__face_box.updateFrame(frame_gray)
+            self.__face_box.updateRect(None, rect)
+            check_liveness = self.__face_box.checkFrame()
+            if check_liveness :
+                self.__is_real = True 
+        return False
+
+    def run():
+        print("[INFO] loading face detector...")
+        self.__detector = dlib.get_frontal_face_detector()
+        self.__vs = Driver.getVideoStream(video_path)
+        self.startDetection()
+        
 
 if __name__ == "__main__":
+    BaseManager.register('FaceBox', FaceBox)
     ap = argparse.ArgumentParser()
-    ap.add_argument("-p", "--shape-predictor", required=True,
+    ap.add_argument("-s", "--shape-predictor", required=True,
         help="path to facial landmark predictor")
     ap.add_argument("-v", "--video", type=str, default="",
         help="path to input video file")
+    ap.add_argument("-e", "--env", type=str, default="pc",
+        help="environment type pi or pc")
     args = vars(ap.parse_args())
-    main(args)
+    driver = Driver(args["shape_predictor"], args["video"], args["env"])
+    driver.run()
     
