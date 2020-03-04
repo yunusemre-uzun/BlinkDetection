@@ -12,24 +12,26 @@ import imutils
 class Driver(object):
     __number_of_processes = None
     __frame_queue = None
+    __environment = None
 
     @staticmethod
-    def getVideoStream(args):
+    def getVideoStream(video_path):
         '''
             Creates VideoStream object, returns object and stream flag as True if file stream enabled. 
             :param args: args of the main program
         '''
-        if args["video"]=="":
-            if args["env"] == "pi":
+        if video_path=="":
+            if Driver.__environment == "pi":
                 # Choose raspberry pi cam
                 vs = VideoStream(usePiCamera=True).start()
             else:
-                vs = VideoStream(0).start()
+                # Choose webcam
+                vs = VideoStream(0, resolution=(1920,1080), framerate=60).start()
             fileStream = False
             print("[INFO] starting camera capturing")
         else:
             # Choose the given video file
-            vs = cv2.VideoCapture(args["video"])
+            vs = cv2.VideoCapture(video_path)
             fileStream = True
             print("[INFO] starting video stream thread...")
         return vs, fileStream
@@ -46,7 +48,8 @@ class Driver(object):
                 return None
         else:
             frame = vs.read()
-        frame = imutils.resize(frame, width=250)
+        if Driver.__environment == "pi":
+            frame = imutils.resize(frame, width=250)
         frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         return frame_gray
 
@@ -77,7 +80,7 @@ class Driver(object):
         cv2.destroyAllWindows()
 
     @staticmethod
-    def startCameraDetection(vs, detector):
+    def startCameraDetection(vs, detector, shape_predictor_path):
         # Create a shared object between processes
         is_real = Value('i', False)
         # Create manager to share FaceBox class between processes
@@ -89,7 +92,7 @@ class Driver(object):
         Driver.__frame_queue = Queue()
         Driver.__frame_queue.put(frame)
         #Initialize dlib's shape predictor to decide landmarks on face
-        shape_predictor = dlib.shape_predictor(args["shape_predictor"])
+        shape_predictor = dlib.shape_predictor(shape_predictor_path)
         #Initilize FaceBox object with manager
         face_box = manager.FaceBox(shape_predictor=shape_predictor, frame=frame)
         #Create n number of processes
@@ -122,7 +125,8 @@ class Driver(object):
                     print("Real")
                     break
             frame = Driver.getFrame(vs, camera_stream)
-            #time.sleep(0.05)
+            #Set 60 FPS as upper limit
+            time.sleep(1/30)
         return frame_counter
     
     @staticmethod
@@ -180,17 +184,18 @@ class Driver(object):
         print ("Avg face detection time:" , avg)
 
     @staticmethod
-    def run(args):
+    def run(shape_predictor, video_path="", environment="pc", processes=1):
         print("[INFO] loading facial landmark predictor...")
         # Load mtcnn detector from facenet
         detector = dlib.get_frontal_face_detector()
-        vs, file_stream = Driver.getVideoStream(args)
-        Driver.__number_of_processes = int(args["proc"])
+        Driver.__environment = environment
+        vs, file_stream = Driver.getVideoStream(video_path)
+        Driver.__number_of_processes = int(processes)
         # Read the first frame
         if(file_stream):
-            Driver.startVideoDetection(vs, detector)
+            Driver.startVideoDetection(vs, detector, shape_predictor)
         else:
-            Driver.startCameraDetection(vs, detector)
+            Driver.startCameraDetection(vs, detector, shape_predictor)
         
 
 if __name__ == "__main__":
@@ -201,9 +206,9 @@ if __name__ == "__main__":
     ap.add_argument("-v", "--video", type=str, default="",
         help="path to input video file")
     ap.add_argument("-e", "--env", type=str, default="pc",
-        help="path to input video file")
+        help="environment type pi or pc")
     ap.add_argument("-p", "--proc", type=str, default="1",
-        help="path to input video file")
+        help="number of proc 1-4")
     args = vars(ap.parse_args())
-    Driver.run(args)
+    Driver.run(args["shape_predictor"], args["video"], args["env"], args["proc"])
     
