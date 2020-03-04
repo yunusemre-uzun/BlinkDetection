@@ -13,8 +13,8 @@ class FaceBox(object):
         self.shape_predictor = shape_predictor
         self.counter = 0
         self.id = BlinkDetector.registerBox(self)
-        self.left_open, self.right_open = False, False
         self.is_previos_eye_closed = False
+        self.blink_detected = False
         self.open_counter = 0
         self.registered = True
     
@@ -25,10 +25,9 @@ class FaceBox(object):
     def register(self):
         if self.registered:
             return self.id
-            return False
         else:
             self.id = BlinkDetector.registerBox(self)
-            return True
+            return self.id
     
     def __getEyesStatus(self):
         return BlinkDetector.getEyesStatus(self.id, self.frame)
@@ -45,17 +44,23 @@ class FaceBox(object):
             if not self.is_previos_eye_closed:
                 self.is_previos_eye_closed = True
             self.counter += 1
+            if self.counter >= EYE_AR_CONSEC_FRAMES:
+                self.blink_detected = True
             self.open_counter = 0
         elif blink_detector_response == 1 : # Eyes are opened
             #print("Opened")
             self.open_counter += 1
-            if self.counter >= EYE_AR_THRESH and self.open_counter >= EYE_AR_THRESH: # Eyes are completely opened after blink
-               # print("Real")
+            if self.blink_detected and self.open_counter >= EYE_AR_CONSEC_FRAMES and not self.is_previos_eye_closed: 
+                # Eyes are completely opened for N frames after blink
                 return True
+            self.is_previos_eye_closed = False
             self.counter = 0   
         else:
             self.counter = 0
+            self.open_counter = 0
+            self.is_previos_eye_closed = False
             #print("Can not decided")
+        print("({},{})".format(self.counter, self.open_counter))
         return False
     
     def updateRect(self, box, rect=None):
