@@ -25,8 +25,7 @@ class Driver(object):
 
     def getVideoStream(self):
         '''
-            Creates VideoStream object, returns object and stream flag as True if file stream enabled. 
-            :param args: args of the main program
+            Creates VideoStream object, and returns it. 
         '''
         if self.__video_path=="":
             if Driver.__environment == "pi":
@@ -78,7 +77,7 @@ class Driver(object):
         frame_counter = 0
         while frame is not None:
             print("Frame read: ", frame_counter)
-            self.processFrame(frame)
+            self.processFrame(frame, rects=None)
             cv2.imshow("Frame", frame)
             frame_counter += 1
             key = cv2.waitKey(1) & 0xFF
@@ -92,8 +91,19 @@ class Driver(object):
             frame = self.getFrame()
         return frame_counter
     
-    def processFrame(self, frame_gray):
-        rects = self.__detector(frame_gray, 0)
+    def processFrame(self, frame_gray, rects=None):
+        '''
+            This function searches for liveness clues in the frame. It can be used standalone with gray scale image.
+            If :param: rects is given, the function does not search for faces again.
+            Returns true when the face box regarded as real else return false.
+                Warning: The Driver can only track 1 face at the same time. 
+                    The behaviour can be undeterministic when more faces exist.
+                Warning: After this function returned True, the face box must be deRegistered.
+        '''
+        if rects is None:
+            rects = self.__detector(frame_gray, 0)
+        # When a face detected, but the face box is not registered in blink detection engine
+        # Happens in when a face is detected after a successful detection.
         if len(rects) and not self.__face_box.registered:
             self.__face_box.register()
         for rect in rects:

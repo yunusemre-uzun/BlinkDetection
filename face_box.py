@@ -58,7 +58,6 @@ class FaceBox(object):
                     self.is_previos_eye_closed = False
                     self.open_counter = 1
                     self.counter = 0
-                    self.is_previos_eye_closed = False   
                 else:
                     self.open_counter += 1
                     if self.close_detected and self.open_counter >= EYE_AR_CONSEC_FRAMES: 
@@ -66,8 +65,6 @@ class FaceBox(object):
                         self.blink_detected = True
                         return True
             else:
-                self.counter = 0
-                self.open_counter = 0
                 self.is_previos_eye_closed = False
             #print("({},{})".format(self.counter, self.open_counter))
             return False
